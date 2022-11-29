@@ -25,27 +25,29 @@ int main(void)
 		size_t size;
 		int count = 0;
 
+        /*putting line from stdin into line*/
 		if (getline(&line, &size, stdin) == -1) {
 			free(line);
 			break;
 		}
-    
+
+        /*creating an array of words*/
 		arglist = (char**) malloc(sizeof(char*));
 		if (arglist == NULL) {
 			printf("malloc failed: %s\n", strerror(errno));
 			exit(1);
 		}
-		arglist[0] = strtok(line, " \t\n");
+		arglist[0] = strtok(line, " \t\n");/*splitting the line into words and putting it in arglist[0]*/
     
 		while (arglist[count] != NULL) {
 			++count;
-			arglist = (char**) realloc(arglist, sizeof(char*) * (count + 1));
+			arglist = (char**) realloc(arglist, sizeof(char*) * (count + 1));/*"making" count+1 spaces in arglist*/
 			if (arglist == NULL) {
 				printf("realloc failed: %s\n", strerror(errno));
 				exit(1);
 			}
       
-			arglist[count] = strtok(NULL, " \t\n");
+			arglist[count] = strtok(NULL, " \t\n");/*NULL at the end of arglist*/
 		}
     
 		if (count != 0) {
