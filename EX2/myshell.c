@@ -170,7 +170,14 @@ int piping_exe(char **arglist, int i) {
     close(pfds[1]);
 
     int status;
-    if ((waitpid(child1, &status, 0) == -1) || (waitpid(child2, &status, 0) == -1)){
+    if (waitpid(child1,&status,0) == -1){
+        if(errno != EINTR && errno != ECHILD){
+            perror(WAIT_ERROR);
+            return 0;
+        }
+    }
+
+    if (waitpid(child2,&status,0) == -1){
         if(errno != EINTR && errno != ECHILD){
             perror(WAIT_ERROR);
             return 0;
