@@ -79,10 +79,9 @@ int background_exe(char **arglist, int count) {
         return 0;
     }
     if (pid == 0){ /*child process*/
-        if (signal_handling(SIGINT, IGNORE) == -1){ /*todo maybe before fork : sigaction instead - important and a must!!!!!!!!*/
-            perror(SIG_H_ERROR);/*todo check if needed*/
+        if (signal_handling(SIGINT, IGNORE) == -1)
             exit(1);
-        }
+
 
         /*not passing '&' to execvp(), the last element of argv must be a NULL pointer*/
         arglist[count-1] = NULL;
@@ -117,10 +116,9 @@ int piping_exe(char **arglist, int i) {
 
     if (child1 == 0){
         /*default handling - foreground process*/
-        if (signal_handling(SIGINT,DEFAULT) == -1){/*signal_handling failed in child process - exit only from child*/
-            perror(SIG_H_ERROR);/*todo check if needed*/
+        if (signal_handling(SIGINT,DEFAULT) == -1)/*signal_handling failed in child process - exit only from child*/
             exit(1);
-        }
+
 
         close(pfds[0]);/*close read side*/
 
@@ -129,7 +127,7 @@ int piping_exe(char **arglist, int i) {
             perror(DUP_ERROR);
             exit(1);
         }
-        close(pfds[1]);/*close write side after duplicating it*//*todo big check about this close line*/
+        close(pfds[1]);/*close write side after duplicating it*/
 
         if (execvp(arglist[0], arglist) == -1){
             perror(EXECVP_ERROR);
@@ -147,10 +145,9 @@ int piping_exe(char **arglist, int i) {
 
     if (child2 == 0){
         /*default handling - foreground process*/
-        if (signal_handling(SIGINT,DEFAULT) == -1){
-            perror(SIG_H_ERROR);/*todo check if needed*/
+        if (signal_handling(SIGINT,DEFAULT) == -1)
             exit(1);
-        }
+
         close(pfds[1]);/*close read side*/
 
         /*replace STDIN with file descriptor*/
@@ -158,7 +155,7 @@ int piping_exe(char **arglist, int i) {
             perror(DUP_ERROR);
             exit(1);
         }
-        close(pfds[0]);/*close write side after duplicating it todo check*//*todo big check about this close line*/
+        close(pfds[0]);/*close write side after duplicating it*/
 
         if (execvp(arglist[i+1], &arglist[i+1]) == -1){/*command and args after '|'*/
             perror(EXECVP_ERROR);
@@ -205,17 +202,16 @@ int redirecting_exe(char **arglist, int i) {
         return 0;
     }
     if (child == 0){
-        if (signal_handling(SIGINT,DEFAULT) == -1){
-            perror(SIG_H_ERROR);/*todo check if needed*/
+        if (signal_handling(SIGINT,DEFAULT) == -1)
             exit(1);
-        }
+
 
 
         if (dup2(fd, STDOUT_FILENO) == -1){
             perror(DUP_ERROR);
             exit(1);
         }
-        close(fd); /*we just duplicated it with STDOUT so we can close it*//*todo big check about this close line*/
+        close(fd); /*we just duplicated it with STDOUT so we can close it*/
 
 
         if (execvp(arglist[0], arglist) == -1){
@@ -244,10 +240,9 @@ int command_exe(char **arglist) {
         return 0;
     }
     if (child == 0){
-        if (signal_handling(SIGINT,DEFAULT) == -1){
-            perror(SIG_H_ERROR);/*todo check if needed*/
+        if (signal_handling(SIGINT,DEFAULT) == -1)
             exit(1);
-        }
+
 
         if (execvp(arglist[0], arglist) == -1){
             perror(EXECVP_ERROR);
@@ -267,7 +262,7 @@ int command_exe(char **arglist) {
 }
 
 
-int contains_symbol(char *string) {/*todo check if not const char*/
+int contains_symbol(char *string) {
     return (*string == '&' || *string == '|'|| *string == '>');
 }
 
@@ -276,10 +271,10 @@ int signal_handling(int signal_type, int i) {
      * https://stackoverflow.com/questions/40601337/what-is-the-use-of-ignoring-sigchld-signal-with-sigaction2/40601403#40601403*/
     struct sigaction sa;
     sa.sa_handler = (i == IGNORE) ? SIG_IGN : SIG_DFL; /*ignore signal*/
-    sa.sa_flags = SA_RESTART;/*todo check, espically about DFL*/
+    sa.sa_flags = SA_RESTART;
     if(sigaction(signal_type, &sa, NULL) == -1)
     {
-        /*todo perror();*/
+        perror(SIG_H_ERROR);
         return -1;
     }
     return 1;
