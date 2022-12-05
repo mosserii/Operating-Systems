@@ -1,8 +1,17 @@
-//
-// Created by Zohar Mosseri on 05/12/2022.
-//
 
+/*todo check about this indef, def*/
 #ifndef OPERATING_SYSTEMS_MESSAGE_SLOT_H
 #define OPERATING_SYSTEMS_MESSAGE_SLOT_H
 
 #endif //OPERATING_SYSTEMS_MESSAGE_SLOT_H
+
+
+#define MAJOR_NUM 235
+#define BUF_LEN 128
+#define MAX_NUM_OF_FILES 256
+#define DEVICE_RANGE_NAME "MESSAGE_SLOT"
+#define SUCCESS 0
+
+#define IOCTL_SET_CHANNEL_ID _IOW(MAJOR_NUM, 0, unsigned long)
+
+/*todo DEVICE_RANGE_NAME*/
