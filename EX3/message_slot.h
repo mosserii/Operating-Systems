@@ -1,0 +1,8 @@
+//
+// Created by Zohar Mosseri on 05/12/2022.
+//
+
+#ifndef OPERATING_SYSTEMS_MESSAGE_SLOT_H
+#define OPERATING_SYSTEMS_MESSAGE_SLOT_H
+
+#endif //OPERATING_SYSTEMS_MESSAGE_SLOT_H
