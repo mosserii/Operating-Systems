@@ -10,6 +10,32 @@
 #include <linux/uaccess.h>  /* for get_user and put_user */
 #include <linux/string.h>   /* for memset. NOTE - not string.h!*/
 
+
+
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/fcntl.h>
+#include <sys/ioctl.h>
+#include <stdbool.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/errno.h>
+#include <string.h>
+#include <sys/fcntl.h>
+#include <signal.h>
+
+
+
+
+
+
+
+
+
 MODULE_LICENSE("GPL");
 
 typedef struct channel{
@@ -18,7 +44,7 @@ typedef struct channel{
 
 typedef struct message_slot{
     channel* first_channel;
-    channel* last_channel;
+    channel* current_channel;
     int j;
 }message_slot;
 
@@ -41,17 +67,12 @@ static int device_open( struct inode* inode,
     if (message_slots_array[minor] == NULL){
         messageSlot = (message_slot*) kmalloc(sizeof(message_slot), GFP_KERNEL);
         channel1 = (channel *) kmalloc(sizeof(channel), GFP_KERNEL);
+
+        messageSlot->first_channel = channel1;
+        messageSlot->j = 0;
+
+        message_slots_array[minor] = messageSlot;
     }
-
-
-
-
-
-
-
-
-
-
     return SUCCESS;
 }
 
@@ -61,15 +82,7 @@ static int device_open( struct inode* inode,
 
 //---------------------------------------------------------------
 static int device_release( struct inode* inode,
-                           struct file*  file)
-{
-    unsigned long flags; // for spinlock
-    printk("Invoking device_release(%p,%p)\n", inode, file);
-
-    // ready for our next caller
-    spin_lock_irqsave(&device_info.lock, flags);
-    --dev_open_flag;
-    spin_unlock_irqrestore(&device_info.lock, flags);
+                           struct file*  file){
     return SUCCESS;
 }
 
@@ -78,16 +91,15 @@ static int device_release( struct inode* inode,
 // the device file attempts to read from it
 static ssize_t device_read( struct file* file,
                             char __user* buffer,
-size_t       length,
-        loff_t*      offset )
-{
-// read doesnt really do anything (for now)
-printk( "Invocing device_read(%p,%ld) - "
-"operation not supported yet\n"
-"(last written - %s)\n",
-file, length, the_message );
-//invalid argument error
-return -EINVAL;
+                            size_t       length,
+                            loff_t*      offset){
+    // read doesnt really do anything (for now)
+    printk("Invocing device_read(%p,%ld) - "
+           "operation not supported yet\n"
+           "(last written - %s)\n",
+           file, length, the_message );
+    //invalid argument error
+    return -EINVAL;
 }
 
 //---------------------------------------------------------------
@@ -95,19 +107,39 @@ return -EINVAL;
 // the device file attempts to write to it
 static ssize_t device_write( struct file*       file,
                              const char __user* buffer,
-size_t             length,
-        loff_t*            offset)
-{
-ssize_t i;
-printk("Invoking device_write(%p,%ld)\n", file, length);
-for( i = 0; i < length && i < BUF_LEN; ++i ) {
-get_user(the_message[i], &buffer[i]);
-if( 1 == encryption_flag )
-the_message[i] += 1;
-}
+                             size_t             length,
+                             loff_t*            offset){
 
-// return the number of input characters used
-return i;
+    channel* channel1;
+    message_slot* messageSlot;
+    printk(KERN_ALERT "in device_write\n");
+    if ( file == NULL ){
+        printk(KERN_DEBUG "file == NULL\n");
+        return -EINVAL;
+    }
+
+    messageSlot = (message_slot *) (file->private_data);
+
+    channel1 = messageSlot->current_channel;
+    if (channel1 == NULL){
+        printk(KERN_DEBUG "channel == NULL\n");
+        return -EINVAL;
+    }
+    printk(KERN_DEBUG "channel == %p\n",channel1);
+
+
+
+
+
+
+
+
+
+
+
+
+    // return the number of input characters used
+    return i;
 }
 
 //----------------------------------------------------------------
