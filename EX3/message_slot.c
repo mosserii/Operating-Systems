@@ -52,7 +52,7 @@ typedef struct message_slot{
 }message_slot;
 
 /*data structure to describe individual message slots*/
-static message_slot* message_slots_array[MAX_NUM_OF_FILES + 1];
+static message_slot* message_slots_array[MAX_NUM_OF_FILES + 1];/*todo check if +1*/
 
 
 
@@ -78,15 +78,12 @@ static int device_open( struct inode* inode,
 
 
         messageSlot->first_channel = channel1;
-        messageSlot->isSET = 0;
+        messageSlot->isSET = 1;/*todo check if needed*/
 
         message_slots_array[minor] = messageSlot;
     }
     return SUCCESS;
 }
-
-
-
 
 
 //---------------------------------------------------------------
