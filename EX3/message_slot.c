@@ -133,6 +133,7 @@ static ssize_t device_write( struct file*       file,
                              size_t             length,
                              loff_t*            offset){
 
+    char* message;
     channel* channel1;
     message_slot* messageSlot;
     int i;
@@ -165,9 +166,12 @@ static ssize_t device_write( struct file*       file,
         return -1;
     }
 
+    message = channel1->current_message;
+    memset(message, 0, sizeof(MAX_BUF_LEN));
+
     channel1->message_length = length;
     for(i = 0; i < length; i++){
-        if(get_user(channel1->current_message[i], &buffer[i]) != 0){
+        if(get_user(message[i], &buffer[i]) != 0){
             return -1;
         }
     }
