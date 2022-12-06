@@ -10,7 +10,7 @@
 #include <linux/uaccess.h>  /* for get_user and put_user */
 #include <linux/string.h>   /* for memset. NOTE - not string.h!*/
 #include <linux/errno.h>
-#include <linuk/slab.h>
+#include <linux/slab.h>
 
 
 
