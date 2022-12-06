@@ -177,6 +177,7 @@ static ssize_t device_write( struct file*       file,
     }
     /*todo check if i == length because its atomic?*/
     /* return the number of written bytes*/
+    printk("%d bytes were written to device\n", i);
     return i;
 }
 
@@ -192,8 +193,6 @@ static long device_ioctl( struct   file* file,
     int already_exists = 0;
 
     int minor;
-
-
 
 
     printk("device_ioctl invoked\n");
@@ -212,19 +211,22 @@ static long device_ioctl( struct   file* file,
     messageSlot = (message_slot*) (file->private_data);
     channel_ptr = (channel*) (messageSlot->first_channel);
 
-    while (channel_ptr != NULL){/*todo big check here*/
-        if (channel_ptr->id == ioctl_command_id){
-            already_exists = 1;
-            messageSlot->current_channel = channel_ptr;
-            break;
+    if (messageSlot->isSET) {
+        while (channel_ptr != NULL) {/*todo big check here*/
+            if (channel_ptr->id == ioctl_command_id) {
+                printk("channel is already exists\n");
+                already_exists = 1;
+                messageSlot->current_channel = channel_ptr;
+                break;
+            }
+            /*keep going till you find the channel is already exists or channel_ptr is NULL*/
+            prev_channel = channel_ptr;
+            channel_ptr = channel_ptr->next;
         }
-        /*keep going till you find the channel is already exists or channel_ptr is NULL*/
-        prev_channel = channel_ptr;
-        channel_ptr = channel_ptr->next;
     }
 
     /*channel creation*/
-    if (!already_exists){
+    if (!already_exists || !(messageSlot->isSET)){
         /*todo check if channel_ptr is the right variable to mess with*/
         new_channel = (channel*) kmalloc(sizeof(channel), GFP_KERNEL);
         if (new_channel == NULL){
@@ -236,6 +238,7 @@ static long device_ioctl( struct   file* file,
         new_channel->current_message = NULL;
         new_channel->message_length = 0;
         if (!messageSlot->isSET){
+            printk("first channel in this file\n");
             messageSlot->first_channel = new_channel;
             messageSlot->isSET = 1;
         }
