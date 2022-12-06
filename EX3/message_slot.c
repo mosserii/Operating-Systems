@@ -13,16 +13,6 @@
 #include <linux/slab.h>
 
 
-
-
-
-
-
-
-
-
-
-
 MODULE_LICENSE("GPL");
 
 typedef struct channel{
@@ -48,24 +38,24 @@ static int device_open( struct inode* inode,
                         struct file*  file ){
 
     int minor;
-    minor = iminor(inode);
     channel* channel1;
     message_slot* messageSlot;
 
-    printk("device_open invoked\n");
+    printk(KERN_ALERT "device_open invoked\n");
 
+    minor = iminor(inode);
+    printk(KERN_DEBUG "minor = %d\n", minor);
     if (message_slots_array[minor] == NULL){
         messageSlot = (message_slot*) kmalloc(sizeof(message_slot), GFP_KERNEL);
         channel1 = (channel *) kmalloc(sizeof(channel), GFP_KERNEL);
         if (messageSlot == NULL || channel1 == NULL){
-            printk("kmalloc failed in device_open\n");
+            printk(KERN_DEBUG "kmalloc failed in device_open\n");
             return -1;
             /*todo return  einmem*/
         }
 
-
         messageSlot->first_channel = channel1;
-        messageSlot->isSET = 1;/*todo check if needed*/
+        messageSlot->isSET = 0;/*todo check if 0 or 1 needed*/
 
         message_slots_array[minor] = messageSlot;
     }
@@ -95,16 +85,16 @@ static ssize_t device_read( struct file* file,
     message_slot* messageSlot;
     int i;
 
-    printk("device_read invoked\n");
+    printk(KERN_ALERT "device_read invoked\n");
 
     if ( file == NULL ){
-    printk("file is NULL\n");
-    return -EINVAL;
+        printk("file is NULL\n");
+        return -EINVAL;
     }
 
     if (length > MAX_BUF_LEN || length == 0){
-    printk("illegal length\n");
-    return -EMSGSIZE;
+        printk("illegal length\n");
+        return -EMSGSIZE;
     }
 
     messageSlot = (message_slot *) (file->private_data);
@@ -114,14 +104,15 @@ static ssize_t device_read( struct file* file,
     }
     channel1 = messageSlot->current_channel;
     if (channel1 == NULL){
-    printk("channel1 is NULL\n");
-    return -EINVAL;
+        printk("channel1 is NULL\n");
+        return -EINVAL;
     }
     message = channel1->current_message;
     message_len = channel1->message_length;
     if (message == NULL || message_len == 0){
         return -EWOULDBLOCK;
     }
+
     if(length < message_len){
         printk("buffer length is smaller than last message length");
         return -ENOSPC;
@@ -192,6 +183,7 @@ static long device_ioctl( struct   file* file,
 
     message_slot* messageSlot;
     channel* channel_ptr;
+    channel* new_channel;
     channel* prev_channel;
     int already_exists = 0;
 
@@ -219,6 +211,7 @@ static long device_ioctl( struct   file* file,
     while (channel_ptr != NULL){/*todo big check here*/
         if (channel_ptr->id == ioctl_command_id){
             already_exists = 1;
+            messageSlot->current_channel = channel_ptr;
             break;
         }
         /*keep going till you find the channel is already exists or channel_ptr is NULL*/
@@ -229,24 +222,24 @@ static long device_ioctl( struct   file* file,
     /*channel creation*/
     if (!already_exists){
         /*todo check if channel_ptr is the right variable to mess with*/
-        channel_ptr = (channel*) kmalloc(sizeof(channel), GFP_KERNEL);
-        if (channel_ptr == NULL){
-            printk("channel_ptr kmalloc failed\n");
+        new_channel = (channel*) kmalloc(sizeof(channel), GFP_KERNEL);
+        if (new_channel == NULL){
+            printk("new_channel kmalloc failed\n");
             return -1;
         }
-        channel_ptr->id = ioctl_command_id;
-        channel_ptr->next = NULL;
-        channel_ptr->current_message = NULL;
-        channel_ptr->message_length = 0;
+        new_channel->id = ioctl_command_id;
+        new_channel->next = NULL;
+        new_channel->current_message = NULL;
+        new_channel->message_length = 0;
         if (!messageSlot->isSET){
-            messageSlot->first_channel = channel_ptr;
+            messageSlot->first_channel = new_channel;
             messageSlot->isSET = 1;
         }
         else {/*messageSlot is already set*/
-            prev_channel->next = channel_ptr;/*adding channel_ptr to the end of the linked list*/
+            prev_channel->next = new_channel;/*adding new_channel to the end of the linked list*/
         }
+        messageSlot->current_channel = new_channel;/*todo check, if you change the name so be careful when it was already exists*/
     }
-    messageSlot->current_channel = channel_ptr;/*todo check, if you change the name so be careful when it was already exists*/
     return SUCCESS;
 }
 
