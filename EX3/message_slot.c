@@ -10,6 +10,7 @@
 #include <linux/uaccess.h>  /* for get_user and put_user */
 #include <linux/string.h>   /* for memset. NOTE - not string.h!*/
 #include <linux/errno.h>
+#include <linuk/slab.h>
 
 
 
@@ -283,7 +284,8 @@ static int __init simple_init(void){
 
 //---------------------------------------------------------------
 static void __exit simple_cleanup(void){ /*todo functions and cleaning here*/
-    channel* channel_ptr, next_channel;
+    channel* channel_ptr;
+    channel* next_channel;
     unregister_chrdev(MAJOR_NUM, DEVICE_RANGE_NAME);
 
     int j;
