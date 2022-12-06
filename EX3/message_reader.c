@@ -12,7 +12,7 @@ int main(int argc, char* argv[]){
     char* slot_path;
     int fd;
     unsigned int channel_id;
-    char message[BUF_LEN];
+    char message[MAX_BUF_LEN];
     int ret_val;
     int message_len;
 
@@ -37,7 +37,7 @@ int main(int argc, char* argv[]){
         exit(1);
     }
 
-    message_len = read(fd, message, BUF_LEN);
+    message_len = read(fd, message, MAX_BUF_LEN);
     if (message_len < 0){
         close(fd);
         perror("ERROR : read failed");

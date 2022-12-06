@@ -40,12 +40,15 @@ MODULE_LICENSE("GPL");
 
 typedef struct channel{
     unsigned int id;
+    char* current_message;
+    int message_length;
 }channel;
 
 typedef struct message_slot{
     channel* first_channel;
     channel* current_channel;
-    int j;
+    int isSET;
+    int minor_num;
 }message_slot;
 
 /*data structure to describe individual message slots*/
@@ -62,14 +65,21 @@ static int device_open( struct inode* inode,
     channel* channel1;
     message_slot* messageSlot;
 
-    printk(KERN_ALERT "in device_open\n");
+    printk("device_open invoked\n");
 
     if (message_slots_array[minor] == NULL){
         messageSlot = (message_slot*) kmalloc(sizeof(message_slot), GFP_KERNEL);
         channel1 = (channel *) kmalloc(sizeof(channel), GFP_KERNEL);
+        if (messageSlot == NULL || channel1 == NULL){
+            printk("kmalloc failed in device_open\n");
+            return -1;
+            /*todo return  einmem*/
+        }
+
 
         messageSlot->first_channel = channel1;
-        messageSlot->j = 0;
+        messageSlot->isSET = 0;
+        messageSlot->minor_num = minor;
 
         message_slots_array[minor] = messageSlot;
     }
@@ -83,6 +93,8 @@ static int device_open( struct inode* inode,
 //---------------------------------------------------------------
 static int device_release( struct inode* inode,
                            struct file*  file){
+    printk("device_release invoked\n");
+    kfree(file->private_data);
     return SUCCESS;
 }
 
@@ -93,13 +105,50 @@ static ssize_t device_read( struct file* file,
                             char __user* buffer,
                             size_t       length,
                             loff_t*      offset){
-    // read doesnt really do anything (for now)
-    printk("Invocing device_read(%p,%ld) - "
-           "operation not supported yet\n"
-           "(last written - %s)\n",
-           file, length, the_message );
-    //invalid argument error
+
+    char* message;
+    int message_len;
+    channel* channel1;
+    message_slot* messageSlot;
+    int i;
+
+    printk("device_read invoked\n");
+
+    if ( file == NULL ){
+    printk("file is NULL\n");
     return -EINVAL;
+    }
+
+    if (length > MAX_BUF_LEN || length == 0){
+    printk("illegal length\n");
+    return -EMSGSIZE;
+    }
+
+    messageSlot = (message_slot *) (file->private_data);
+    if (messageSlot == NULL){
+        printk("messageSlot is NULL\n");
+        return -EINVAL;
+    }
+    channel1 = messageSlot->current_channel;
+    if (channel1 == NULL){
+    printk("channel1 is NULL\n");
+    return -EINVAL;
+    }
+    message = channel1->current_message;
+    message_len = channel1->message_length;
+    if (message == NULL || message_len == 0){
+        return -EWOULDBLOCK;
+    }
+    if(length < message_len){
+        printk("buffer length is smaller than last message length");
+        return -ENOSPC;
+    }
+
+    for(i = 0; i < message_len; i++){
+        if(put_user(message[i], &buffer[i]) != 0)
+            return -1;/*todo maybe different error*/
+    }
+    return i;
 }
 
 //---------------------------------------------------------------
@@ -112,33 +161,44 @@ static ssize_t device_write( struct file*       file,
 
     channel* channel1;
     message_slot* messageSlot;
-    printk(KERN_ALERT "in device_write\n");
+    int i;
+
+    printk("device_write invoked\n");
+
     if ( file == NULL ){
-        printk(KERN_DEBUG "file == NULL\n");
-        return -EINVAL;
+        printk("file is NULL\n");
+        return -EINVAL;/*todo check*/
+    }
+
+    if (length > MAX_BUF_LEN || length == 0){
+        printk("illegal length\n");
+        return -EMSGSIZE;
     }
 
     messageSlot = (message_slot *) (file->private_data);
 
     channel1 = messageSlot->current_channel;
     if (channel1 == NULL){
-        printk(KERN_DEBUG "channel == NULL\n");
+        printk("channel1 is NULL\n");
         return -EINVAL;
     }
-    printk(KERN_DEBUG "channel == %p\n",channel1);
 
+    /*not an error, we just allocate space for message inside the channel*/
+    if (channel1 -> current_message == NULL){
+    printk("channel1 message is NULL\n");
+    channel1 -> current_message = (char *) kmalloc(MAX_BUF_LEN, GFP_KERNEL);
+    if(channel1 -> current_message == NULL) /*kmalloc failed!*/
+        return -1;
+    }
 
-
-
-
-
-
-
-
-
-
-
-    // return the number of input characters used
+    channel1->message_length = length;
+    for(i = 0; i < length; i++){
+        if(get_user(channel1->current_message[i], &buffer[i]) != 0){
+            return -1;
+        }
+    }
+    /*todo check if i == length because its atomic?*/
+    /* return the number of written bytes*/
     return i;
 }
 
@@ -181,7 +241,7 @@ static int __init simple_init(void){
 
     // Negative values signify an error
     if( rc < 0 ){
-        printk( KERN_ALERT "%s registraion failed for  %d\n",
+        printk("%s registraion failed for  %d\n",
                 DEVICE_FILE_NAME, MAJOR_NUM );
         return rc;
     }
