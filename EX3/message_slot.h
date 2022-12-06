@@ -6,7 +6,7 @@
 #define MAJOR_NUM 235
 #define MAX_BUF_LEN 128
 #define MAX_NUM_OF_FILES 256
-#define DEVICE_RANGE_NAME "MESSAGE_SLOT"
+#define DEVICE_RANGE_NAME "message_slot"
 #define SUCCESS 0
 
 #define MSG_SLOT_CHANNEL _IOW(MAJOR_NUM, 0, unsigned long)

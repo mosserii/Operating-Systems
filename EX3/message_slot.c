@@ -49,15 +49,18 @@ static int device_open( struct inode* inode,
         messageSlot = (message_slot*) kmalloc(sizeof(message_slot), GFP_KERNEL);
         channel1 = (channel *) kmalloc(sizeof(channel), GFP_KERNEL);
         if (messageSlot == NULL || channel1 == NULL){
-            printk(KERN_DEBUG "kmalloc failed in device_open\n");
+            printk("kmalloc failed in device_open\n");
             return -1;
             /*todo return  einmem*/
         }
 
         messageSlot->first_channel = channel1;
-        messageSlot->isSET = 0;/*todo check if 0 or 1 needed*/
+        messageSlot->isSET = 1;/*todo check if 0 or 1 needed*/
+        /*messageSlot->isSET = 0;*//*todo check if 0 or 1 needed*/
 
         message_slots_array[minor] = messageSlot;
+        printk("device_open succeeded\n");
+
     }
     return SUCCESS;
 }
@@ -102,16 +105,24 @@ static ssize_t device_read( struct file* file,
         printk("messageSlot is NULL\n");
         return -EINVAL;
     }
+    printk(KERN_DEBUG "messageSlot = %p\n", messageSlot);
+
     channel1 = messageSlot->current_channel;
     if (channel1 == NULL){
-        printk("channel1 is NULL\n");
+        printk("channel1 is NULL in device_read\n");
         return -EINVAL;
     }
+    printk(KERN_DEBUG "channel1 = %p\n", channel1);
+
+
+    /*todo check here!!!!!!!!!!, message_len == 0*/
     message = channel1->current_message;
     message_len = channel1->message_length;
-    if (message == NULL || message_len == 0){
+    if (message == NULL){
+        printk("(message == NULL) in device_read\n");
         return -EWOULDBLOCK;
     }
+    printk(KERN_DEBUG "message = %p, channel1->current_message = %p, message_len = %d\n", message, channel1->current_message, message_len);
 
     if(length < message_len){
         printk("buffer length is smaller than last message length");
@@ -119,9 +130,10 @@ static ssize_t device_read( struct file* file,
     }
 
     for(i = 0; i < message_len; i++){
-        if(put_user(message[i], &buffer[i]) != 0)
+        if((put_user(message[i], &buffer[i])) != 0)
             return -1;/*todo maybe different error*/
     }
+    printk("%d bytes were read from device\n", i);
     return i;
 }
 
@@ -146,24 +158,34 @@ static ssize_t device_write( struct file*       file,
     }
 
     if (length > MAX_BUF_LEN || length == 0){
-        printk("illegal length\n");
+        printk("illegal length in device_write() \n");
         return -EMSGSIZE;
     }
 
     messageSlot = (message_slot *) (file->private_data);
+    if (messageSlot == NULL){
+        printk("messageSlot is NULL\n");
+        return -EINVAL;
+    }
+    printk("messageSlot = %p\n", messageSlot);
+
 
     channel1 = messageSlot->current_channel;
     if (channel1 == NULL){
         printk("channel1 is NULL\n");
         return -EINVAL;
     }
+    printk("channel1 = %p\n", channel1);
+
 
     /*not an error, we just allocate space for message inside the channel*/
-    if (channel1 -> current_message == NULL){
-    printk("channel1 message is NULL\n");
-    channel1 -> current_message = (char *) kmalloc(MAX_BUF_LEN, GFP_KERNEL);
-    if(channel1 -> current_message == NULL) /*kmalloc failed!*/
-        return -1;
+    if (channel1->current_message == NULL){
+        printk("not an error, channel1 message is NULL\n");
+        channel1 -> current_message = (char *) kmalloc(MAX_BUF_LEN, GFP_KERNEL);
+        if(channel1->current_message == NULL){ /*kmalloc failed!*/
+            printk("kmalloc failed in allocating message space inside channel\n");
+            return -1;
+        }
     }
 
     message = channel1->current_message;
@@ -172,6 +194,7 @@ static ssize_t device_write( struct file*       file,
     channel1->message_length = length;
     for(i = 0; i < length; i++){
         if(get_user(message[i], &buffer[i]) != 0){
+            printk("i = %d get_user(message[i], &buffer[i]) != 0\n", i);
             return -1;
         }
     }
@@ -191,29 +214,43 @@ static long device_ioctl( struct   file* file,
     channel* new_channel;
     channel* prev_channel;
     int already_exists = 0;
-
     int minor;
-
-
+    prev_channel = NULL; /*in case we do not enter the if expression*/
     printk("device_ioctl invoked\n");
-    if( MSG_SLOT_CHANNEL != ioctl_command_id || 0 == ioctl_param) {
+
+    if(MSG_SLOT_CHANNEL != ioctl_command_id || 0 == ioctl_param) {
+        printk("(MSG_SLOT_CHANNEL != ioctl_command_id || 0 == ioctl_param)\n");
         return -EINVAL;
     }
 
-    if(file->f_inode == NULL)
+    if(file->f_inode == NULL) {
+        printk("(file->f_inode == NULL)\n");
         return -EINVAL;
+    }
     minor = iminor(file->f_inode);
 
     if(message_slots_array[minor]==NULL){
+        printk("message_slot_array and file error\n");
         return -1;/*todo check*/
     }
-    file->private_data = (void*) message_slots_array[minor];
-    messageSlot = (message_slot*) (file->private_data);
-    channel_ptr = (channel*) (messageSlot->first_channel);
 
-    if (messageSlot->isSET) {
+    file->private_data = (void*) message_slots_array[minor];/*todo check!!!!!*/
+
+
+    messageSlot = (message_slot*) (file->private_data);
+    if (messageSlot == NULL){
+        printk("messageSlot is NULL in ioctl()\n");
+        return -EINVAL;
+    }
+    printk("messageSlot in ioctl = %p\n", messageSlot);
+
+    channel_ptr = (channel*) (messageSlot->first_channel);
+    printk("channel_ptr in ioctl = %p\n", channel_ptr);
+
+    if (messageSlot->isSET) { /*we have already initialized this slot and it has at least one channel*/
+        printk("(messageSlot isSET)\n");
         while (channel_ptr != NULL) {/*todo big check here*/
-            if (channel_ptr->id == ioctl_command_id) {
+            if (channel_ptr->id == ioctl_param) {
                 printk("channel is already exists\n");
                 already_exists = 1;
                 messageSlot->current_channel = channel_ptr;
@@ -233,7 +270,7 @@ static long device_ioctl( struct   file* file,
             printk("new_channel kmalloc failed\n");
             return -1;
         }
-        new_channel->id = ioctl_command_id;
+        new_channel->id = ioctl_param;
         new_channel->next = NULL;
         new_channel->current_message = NULL;
         new_channel->message_length = 0;
