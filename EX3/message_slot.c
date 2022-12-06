@@ -9,24 +9,10 @@
 #include <linux/fs.h>       /* for register_chrdev */
 #include <linux/uaccess.h>  /* for get_user and put_user */
 #include <linux/string.h>   /* for memset. NOTE - not string.h!*/
+#include <linux/errno.h>
 
 
 
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/fcntl.h>
-#include <sys/ioctl.h>
-#include <stdbool.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/errno.h>
-#include <string.h>
-#include <sys/fcntl.h>
-#include <signal.h>
 
 
 
