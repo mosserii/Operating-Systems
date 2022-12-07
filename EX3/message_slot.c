@@ -181,7 +181,6 @@ static ssize_t device_write( struct file*       file,
         return -EINVAL;
     }
     printk("channel1 = %p\n", channel1);
-    printk("first_channel pointer in write = %p\n", messageSlot->first_channel);
 
 
     /*not an error, we just allocate space for message inside the channel*/
@@ -220,7 +219,6 @@ static long device_ioctl( struct   file* file,
     channel* channel_ptr;
     channel* new_channel;
     channel* prev_channel;
-    channel* dummy;
     int already_exists = 0;
     int minor;
     prev_channel = NULL; /*in case we do not enter the if expression*/
@@ -245,10 +243,13 @@ static long device_ioctl( struct   file* file,
         return -1;/*todo check*/
     }
 
-    file->private_data = (void*) message_slots_array[minor];/*todo check!!!!!*/
+    /*file->private_data = (void*) message_slots_array[minor];todo check!!!!!
+    messageSlot = (message_slot*) (file->private_data);*/
+
+    messageSlot = (message_slot*)(file->private_data);
 
 
-    messageSlot = (message_slot*) (file->private_data);
+
     if (messageSlot == NULL){
         printk("messageSlot is NULL in ioctl()\n");
         return -EINVAL;
@@ -290,8 +291,7 @@ static long device_ioctl( struct   file* file,
         new_channel->message_length = 0;
         if (!messageSlot->isSET){
             printk("first channel in this file\n");
-            dummy = messageSlot->first_channel;
-            dummy->next = new_channel;/*todo check be careful*/
+            messageSlot->first_channel->next = new_channel;
             messageSlot->isSET = 1;
         }
         else {/*messageSlot is already set*/
