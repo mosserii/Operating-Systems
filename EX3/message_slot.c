@@ -247,12 +247,13 @@ static long device_ioctl( struct   file* file,
     printk("messageSlot in ioctl = %p\n", messageSlot);
 
     channel_ptr = (channel*) (messageSlot->first_channel);
-    printk("first_channel oof messageSlot in ioctl = %p\n", channel_ptr);
+    printk("first_channel_ptr oof messageSlot in ioctl = %p\n", channel_ptr);
 
     if (messageSlot->isSET) { /*we have already initialized this slot and it has at least one channel*/
         printk("(messageSlot isSET)\n");
         while (channel_ptr != NULL) {/*todo big check here*/
             printk("(while (channel_ptr != NULL))\n");
+            printk("channel_ptr id k = %u\n", channel_ptr->id);
             if (channel_ptr->id == ioctl_param) {
                 printk("channel is already exists\n");
                 already_exists = 1;
@@ -279,7 +280,7 @@ static long device_ioctl( struct   file* file,
         new_channel->message_length = 0;
         if (!messageSlot->isSET){
             printk("first channel in this file\n");
-            messageSlot->first_channel = new_channel;
+            messageSlot->first_channel->next = new_channel;/*todo check be careful*/
             messageSlot->isSET = 1;
         }
         else {/*messageSlot is already set*/
