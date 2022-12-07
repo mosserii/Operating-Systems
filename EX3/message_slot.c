@@ -181,7 +181,7 @@ static ssize_t device_write( struct file*       file,
         return -EINVAL;
     }
     printk("channel1 = %p\n", channel1);
-    printk("channel1 pointer = %p\n", &channel1);
+    printk("first_channel pointer in write = %p\n", messageSlot->first_channel);
 
 
     /*not an error, we just allocate space for message inside the channel*/
