@@ -251,6 +251,7 @@ static long device_ioctl( struct   file* file,
 
     channel_ptr = (channel*) (messageSlot->first_channel);
     printk("first_channel_ptr oof messageSlot in ioctl = %p\n", channel_ptr);
+    printk("first_channel_ptr id oof messageSlot = %u\n", channel_ptr->id);
 
     if (messageSlot->isSET) { /*we have already initialized this slot and it has at least one channel*/
         printk("(messageSlot isSET)\n");
