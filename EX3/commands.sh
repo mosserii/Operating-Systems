@@ -8,5 +8,8 @@ sudo chmod 0777 /dev/ops2
 sudo chmod 0777 /dev/ops3
 gcc -O3 -Wall -std=c11 message_reader.c -o READER
 gcc -O3 -Wall -std=c11 message_sender.c -o SENDER
+./SENDER /dev/ops1 6 hola
+./READER /dev/ops1 6
+dmesg
 
 
