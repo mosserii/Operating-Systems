@@ -60,6 +60,11 @@ static int device_open( struct inode* inode,
         messageSlot->isSET = 0;/*todo check if 0 or 1 needed*/
         message_slots_array[minor] = messageSlot;
 
+    }else{
+        printk("messageSlot->first_channel ptr in open = %p\n", &(message_slots_array[minor]->first_channel));
+        printk("first_channel_ptr id oof messageSlot = %u\n", message_slots_array[minor]->first_channel->id);
+
+
     }
     printk("device_open succeeded\n");
     return SUCCESS;
@@ -215,6 +220,7 @@ static long device_ioctl( struct   file* file,
     channel* channel_ptr;
     channel* new_channel;
     channel* prev_channel;
+    channel* dummy;
     int already_exists = 0;
     int minor;
     prev_channel = NULL; /*in case we do not enter the if expression*/
@@ -284,7 +290,8 @@ static long device_ioctl( struct   file* file,
         new_channel->message_length = 0;
         if (!messageSlot->isSET){
             printk("first channel in this file\n");
-            messageSlot->first_channel->next = new_channel;/*todo check be careful*/
+            dummy = messageSlot->first_channel;
+            dummy->next = new_channel;/*todo check be careful*/
             messageSlot->isSET = 1;
         }
         else {/*messageSlot is already set*/
