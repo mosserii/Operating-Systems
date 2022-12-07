@@ -55,6 +55,7 @@ static int device_open( struct inode* inode,
             /*todo return  einmem*/
         }
 
+        channel1->id = 66;/*just for myself*/
         messageSlot->first_channel = channel1;
         messageSlot->isSET = 0;/*todo check if 0 or 1 needed*/
         message_slots_array[minor] = messageSlot;
@@ -175,6 +176,7 @@ static ssize_t device_write( struct file*       file,
         return -EINVAL;
     }
     printk("channel1 = %p\n", channel1);
+    printk("channel1 pointer = %p\n", &channel1);
 
 
     /*not an error, we just allocate space for message inside the channel*/
