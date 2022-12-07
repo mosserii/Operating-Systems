@@ -56,11 +56,10 @@ static int device_open( struct inode* inode,
 
         messageSlot->first_channel = channel1;
         messageSlot->isSET = 0;/*todo check if 0 or 1 needed*/
-
         message_slots_array[minor] = messageSlot;
-        printk("device_open succeeded\n");
 
     }
+    printk("device_open succeeded\n");
     return SUCCESS;
 }
 
@@ -217,6 +216,9 @@ static long device_ioctl( struct   file* file,
     int minor;
     prev_channel = NULL; /*in case we do not enter the if expression*/
     printk("device_ioctl invoked\n");
+    printk("ioctl_param = %lu\n", ioctl_param);
+
+
 
     if(MSG_SLOT_CHANNEL != ioctl_command_id || 0 == ioctl_param) {
         printk("(MSG_SLOT_CHANNEL != ioctl_command_id || 0 == ioctl_param)\n");
@@ -245,11 +247,12 @@ static long device_ioctl( struct   file* file,
     printk("messageSlot in ioctl = %p\n", messageSlot);
 
     channel_ptr = (channel*) (messageSlot->first_channel);
-    printk("channel_ptr in ioctl = %p\n", channel_ptr);
+    printk("first_channel oof messageSlot in ioctl = %p\n", channel_ptr);
 
     if (messageSlot->isSET) { /*we have already initialized this slot and it has at least one channel*/
         printk("(messageSlot isSET)\n");
         while (channel_ptr != NULL) {/*todo big check here*/
+            printk("(while (channel_ptr != NULL))\n");
             if (channel_ptr->id == ioctl_param) {
                 printk("channel is already exists\n");
                 already_exists = 1;
