@@ -46,6 +46,7 @@ static int device_open( struct inode* inode,
     minor = iminor(inode);
     printk(KERN_DEBUG "minor = %d\n", minor);
     if (message_slots_array[minor] == NULL){
+        printk("(message_slots_array[minor] == NULL) in device_open\n");
         messageSlot = (message_slot*) kmalloc(sizeof(message_slot), GFP_KERNEL);
         channel1 = (channel *) kmalloc(sizeof(channel), GFP_KERNEL);
         if (messageSlot == NULL || channel1 == NULL){
@@ -288,6 +289,7 @@ static long device_ioctl( struct   file* file,
         }
         messageSlot->current_channel = new_channel;/*todo check, if you change the name so be careful when it was already exists*/
     }
+    printk("messageSlot->first_channel at the end of ioctl = %p\n", messageSlot->first_channel);
     return SUCCESS;
 }
 
