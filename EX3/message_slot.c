@@ -189,7 +189,8 @@ static ssize_t device_write( struct file*       file,
     }
 
     message = channel1->current_message;
-    memset(message, 0, sizeof(MAX_BUF_LEN));
+    /*todo check here, maybe lentgh instead of MAX_BUF_LEN*/
+    memset(message, 0, sizeof(length));
 
     channel1->message_length = length;
     for(i = 0; i < length; i++){
