@@ -55,8 +55,7 @@ static int device_open( struct inode* inode,
         }
 
         messageSlot->first_channel = channel1;
-        messageSlot->isSET = 1;/*todo check if 0 or 1 needed*/
-        /*messageSlot->isSET = 0;*//*todo check if 0 or 1 needed*/
+        messageSlot->isSET = 0;/*todo check if 0 or 1 needed*/
 
         message_slots_array[minor] = messageSlot;
         printk("device_open succeeded\n");
