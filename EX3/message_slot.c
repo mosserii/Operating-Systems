@@ -187,13 +187,13 @@ static ssize_t device_write( struct file*       file,
         }
     }
 
-    message = channel1->current_message;
+    /*message = channel1->current_message;*/
     /*todo check here, maybe lentgh instead of MAX_BUF_LEN*/
-    memset(message, 0, sizeof(length));
+    memset(channel1->current_message, 0, sizeof(length));
 
     channel1->message_length = length;
     for(i = 0; i < length; i++){
-        if(get_user(message[i], &buffer[i]) != 0){
+        if(get_user(channel1->current_message[i], &buffer[i]) != 0){
             printk("i = %d get_user(message[i], &buffer[i]) != 0\n", i);
             return -1;
         }
