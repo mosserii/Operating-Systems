@@ -91,6 +91,7 @@ static ssize_t device_read( struct file* file,
     channel* channel1;
     message_slot* messageSlot;
     int i;
+    int minor;
 
     printk(KERN_ALERT "device_read invoked\n");
 
@@ -104,7 +105,12 @@ static ssize_t device_read( struct file* file,
         return -EMSGSIZE;
     }
 
-    messageSlot = (message_slot *) (file->private_data);
+    minor = iminor(file->f_inode);
+    printk("minor in READ = %d\n", minor);
+    /*messageSlot = (message_slot *) (file->private_data);*/
+    messageSlot = (message_slot *) message_slots_array[minor];
+
+    /*messageSlot = (message_slot *) (file->private_data);*/
     if (messageSlot == NULL){
         printk("messageSlot is NULL\n");
         return -EINVAL;
