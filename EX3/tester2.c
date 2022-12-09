@@ -13,7 +13,7 @@
 #define BUFF_SIZE 128
 int DEBUG = 0; /*change to 1 to see PASSING tests*/
 int status=1;
-char* channels_msg[1024];
+char* channels_msg[257];
 
 /* limit to 1024 channels for easy test */
 int get_random_channel(){
