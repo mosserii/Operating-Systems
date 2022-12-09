@@ -62,7 +62,7 @@ static int device_open( struct inode* inode,
 
     }else{
         printk("messageSlot in open = %p\n", message_slots_array[minor]);
-        /*printk("messageSlot->first_channel ptr in open = %p\n", (message_slots_array[minor]->first_channel));*/
+        printk("messageSlot->first_channel ptr in open = %p\n", (message_slots_array[minor]->first_channel));
         /*printk("first_channel_ptr id oof messageSlot in open = %u\n", message_slots_array[minor]->first_channel->id);*/
     }
     printk("device_open succeeded\n");
