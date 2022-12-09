@@ -256,7 +256,7 @@ static long device_ioctl( struct   file* file,
         return -1;/*todo check*/
     }
 
-    /*file->private_data = (void*) message_slots_array[minor];*//*todo check!!!!!*/
+    file->private_data = (void*) message_slots_array[minor];/*todo check!!!!!*/
     /*messageSlot = (message_slot*) (file->private_data);*/
     messageSlot = (message_slot*) (message_slots_array[minor]);
     if (messageSlot == NULL){
