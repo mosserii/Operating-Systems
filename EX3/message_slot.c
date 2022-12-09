@@ -61,6 +61,7 @@ static int device_open( struct inode* inode,
         message_slots_array[minor] = messageSlot;
 
     }else{
+        printk("messageSlot in open = %p\n", message_slots_array[minor]);
         printk("messageSlot->first_channel ptr in open = %p\n", (message_slots_array[minor]->first_channel));
         printk("first_channel_ptr id oof messageSlot in open = %u\n", message_slots_array[minor]->first_channel->id);
     }
@@ -290,6 +291,7 @@ static long device_ioctl( struct   file* file,
             messageSlot->isSET = 1;
         }
         else {/*messageSlot is already set*/
+            printk("messageSlot is already set, prev_channel = %p\n", prev_channel);
             prev_channel->next = new_channel;/*adding new_channel to the end of the linked list*/
         }
         messageSlot->current_channel = new_channel;/*todo check, if you change the name so be careful when it was already exists*/
