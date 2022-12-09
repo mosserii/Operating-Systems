@@ -243,7 +243,7 @@ static long device_ioctl( struct   file* file,
         return -1;/*todo check*/
     }
 
-    file->private_data = (void*) message_slots_array[minor];/*todo check!!!!!*/
+    /*file->private_data = (void*) message_slots_array[minor];*//*todo check!!!!!*/
 
 
     messageSlot = (message_slot*) (file->private_data);
@@ -251,6 +251,7 @@ static long device_ioctl( struct   file* file,
         printk("messageSlot is NULL in ioctl()\n");
         return -EINVAL;
     }
+    printk("message_slots_array[minor] in ioctl = %p\n", message_slots_array[minor]);
     printk("messageSlot in ioctl = %p\n", messageSlot);
 
     channel_ptr = (channel*) (messageSlot->first_channel);
