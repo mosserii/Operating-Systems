@@ -153,6 +153,7 @@ static ssize_t device_write( struct file*       file,
     channel* channel1;
     message_slot* messageSlot;
     int i;
+    int minor; //todo delete
 
     printk("device_write invoked\n");
 
@@ -166,7 +167,11 @@ static ssize_t device_write( struct file*       file,
         return -EMSGSIZE;
     }
 
-    messageSlot = (message_slot *) (file->private_data);
+    minor = iminor(file->f_inode);
+    printk("minor in write = %d\n", minor);
+    /*messageSlot = (message_slot *) (file->private_data);*/
+    messageSlot = message_slots_array[minor];
+
     if (messageSlot == NULL){
         printk("messageSlot is NULL\n");
         return -EINVAL;
