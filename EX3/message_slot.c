@@ -107,9 +107,9 @@ static ssize_t device_read( struct file* file,
 
     minor = iminor(file->f_inode);
     printk("minor in READ = %d\n", minor);
-
-
+    /*messageSlot = (message_slot *) (file->private_data);*/
     messageSlot = (message_slot *) message_slots_array[minor];
+
     /*messageSlot = (message_slot *) (file->private_data);*/
     if (messageSlot == NULL){
         printk("messageSlot is NULL\n");
@@ -143,9 +143,7 @@ static ssize_t device_read( struct file* file,
         if((put_user(message[i], &buffer[i])) != 0)
             return -1;/*todo maybe different error*/
     }
-
     printk("%d bytes were read from device\n", i);
-    file->private_data = (void*) messageSlot;
     return i;
 }
 
@@ -177,9 +175,9 @@ static ssize_t device_write( struct file*       file,
 
     minor = iminor(file->f_inode);
     printk("minor in write = %d\n", minor);
-
     /*messageSlot = (message_slot *) (file->private_data);*/
     messageSlot = message_slots_array[minor];
+
     if (messageSlot == NULL){
         printk("messageSlot is NULL\n");
         return -EINVAL;
@@ -220,7 +218,6 @@ static ssize_t device_write( struct file*       file,
     /* return the number of written bytes*/
     printk("%d bytes were written to device\n", i);
     printk("messageSlot->first_channel at the end of WRITE = %p\n", messageSlot->first_channel);
-    file->private_data = (void*) messageSlot;
 
     return i;
 }
@@ -312,7 +309,6 @@ static long device_ioctl( struct   file* file,
         }
         messageSlot->current_channel = new_channel;/*todo check, if you change the name so be careful when it was already exists*/
     }
-    file->private_data = (void*) messageSlot;
     printk("messageSlot->first_channel at the end of ioctl = %p\n", messageSlot->first_channel);
     return SUCCESS;
 }
