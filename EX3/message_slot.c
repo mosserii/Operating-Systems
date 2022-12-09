@@ -55,14 +55,14 @@ static int device_open( struct inode* inode,
             /*todo return  einmem*/
         }
 
-        channel1->id = 66;/*just for myself*/
-        messageSlot->first_channel = channel1;
+        /*channel1->id = 66;*//*just for myself*/
+        /*messageSlot->first_channel = channel1;*/
         messageSlot->isSET = 0;/*todo check if 0 or 1 needed*/
         message_slots_array[minor] = messageSlot;
 
     }else{
         printk("messageSlot in open = %p\n", message_slots_array[minor]);
-        printk("messageSlot->first_channel ptr in open = %p\n", (message_slots_array[minor]->first_channel));
+        /*printk("messageSlot->first_channel ptr in open = %p\n", (message_slots_array[minor]->first_channel));*/
         /*printk("first_channel_ptr id oof messageSlot in open = %u\n", message_slots_array[minor]->first_channel->id);*/
     }
     printk("device_open succeeded\n");
@@ -254,7 +254,7 @@ static long device_ioctl( struct   file* file,
 
     channel_ptr = (channel*) (messageSlot->first_channel);
     printk("first_channel_ptr oof messageSlot in ioctl = %p\n", channel_ptr);
-    printk("first_channel_ptr id oof messageSlot = %u\n", channel_ptr->id);
+    /*printk("first_channel_ptr id oof messageSlot = %u\n", channel_ptr->id);*/
 
     if (messageSlot->isSET) { /*we have already initialized this slot and it has at least one channel*/
         printk("(messageSlot isSET)\n");
@@ -287,7 +287,7 @@ static long device_ioctl( struct   file* file,
         new_channel->message_length = 0;
         if (!messageSlot->isSET){
             printk("first channel in this file\n");
-            messageSlot->first_channel->next = new_channel;
+            messageSlot->first_channel = new_channel;
             messageSlot->isSET = 1;
         }
         else {/*messageSlot is already set*/
