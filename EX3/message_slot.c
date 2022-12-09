@@ -273,8 +273,6 @@ static long device_ioctl( struct   file* file,
     if (messageSlot->isSET) { /*we have already initialized this slot and it has at least one channel*/
         printk("(messageSlot isSET)\n");
         while (channel_ptr != NULL) {/*todo big check here*/
-            printk("(while (channel_ptr != NULL))\n");
-            printk("channel_ptr id k = %u\n", channel_ptr->id);
             if (channel_ptr->id == ioctl_param) {
                 printk("channel is already exists\n");
                 already_exists = 1;
