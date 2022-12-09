@@ -178,6 +178,11 @@ static ssize_t device_write( struct file*       file,
     /*messageSlot = (message_slot *) (file->private_data);*/
     messageSlot = message_slots_array[minor];
 
+    if ((file->private_data)== NULL){
+        printk("(file->private_data) is NULL\n");
+        return -EINVAL;
+    }
+
     if (messageSlot == NULL){
         printk("messageSlot is NULL\n");
         return -EINVAL;
