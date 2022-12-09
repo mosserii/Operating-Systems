@@ -61,10 +61,8 @@ static int device_open( struct inode* inode,
         message_slots_array[minor] = messageSlot;
 
     }else{
-        printk("messageSlot->first_channel ptr in open = %p\n", &(message_slots_array[minor]->first_channel));
-        printk("first_channel_ptr id oof messageSlot = %u\n", message_slots_array[minor]->first_channel->id);
-
-
+        printk("messageSlot->first_channel ptr in open = %p\n", (message_slots_array[minor]->first_channel));
+        printk("first_channel_ptr id oof messageSlot in open = %u\n", message_slots_array[minor]->first_channel->id);
     }
     printk("device_open succeeded\n");
     return SUCCESS;
@@ -207,6 +205,8 @@ static ssize_t device_write( struct file*       file,
     /*todo check if i == length because its atomic?*/
     /* return the number of written bytes*/
     printk("%d bytes were written to device\n", i);
+    printk("messageSlot->first_channel at the end of WRITE = %p\n", messageSlot->first_channel);
+
     return i;
 }
 
