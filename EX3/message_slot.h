@@ -3,6 +3,8 @@
 #ifndef OPERATING_SYSTEMS_MESSAGE_SLOT_H
 #define OPERATING_SYSTEMS_MESSAGE_SLOT_H
 
+#include <linux/ioctl.h>
+
 #define MAJOR_NUM 235
 #define MAX_BUF_LEN 128
 #define MAX_NUM_OF_FILES 256
