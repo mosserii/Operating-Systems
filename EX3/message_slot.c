@@ -238,14 +238,16 @@ static long device_ioctl( struct   file* file,
         return -EINVAL;
     }
     minor = iminor(file->f_inode);
+    printk("minor in ioctl = %d\n", minor);
 
     if(message_slots_array[minor]==NULL){
         printk("message_slot_array and file error\n");
         return -1;/*todo check*/
     }
 
-    file->private_data = (void*) message_slots_array[minor];/*todo check!!!!!*/
-    messageSlot = (message_slot*) (file->private_data);
+    /*file->private_data = (void*) message_slots_array[minor];*//*todo check!!!!!*/
+    /*messageSlot = (message_slot*) (file->private_data);*/
+    messageSlot = (message_slot*) (message_slots_array[minor]);
     if (messageSlot == NULL){
         printk("messageSlot is NULL in ioctl()\n");
         return -EINVAL;
