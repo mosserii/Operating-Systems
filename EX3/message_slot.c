@@ -65,6 +65,7 @@ static int device_open( struct inode* inode,
         printk("messageSlot->first_channel ptr in open = %p\n", (message_slots_array[minor]->first_channel));
         /*printk("first_channel_ptr id oof messageSlot in open = %u\n", message_slots_array[minor]->first_channel->id);*/
     }
+    file->private_data = (void *) messageSlot;/*todo check*/
     printk("device_open succeeded\n");
     return SUCCESS;
 }
@@ -108,9 +109,9 @@ static ssize_t device_read( struct file* file,
     minor = iminor(file->f_inode);
     printk("minor in READ = %d\n", minor);
     /*messageSlot = (message_slot *) (file->private_data);*/
-    messageSlot = (message_slot *) message_slots_array[minor];
+    /*messageSlot = (message_slot *) message_slots_array[minor];*/
 
-    /*messageSlot = (message_slot *) (file->private_data);*/
+    messageSlot = (message_slot *) (file->private_data);
     if (messageSlot == NULL){
         printk("messageSlot is NULL\n");
         return -EINVAL;
@@ -175,8 +176,8 @@ static ssize_t device_write( struct file*       file,
 
     minor = iminor(file->f_inode);
     printk("minor in write = %d\n", minor);
-    /*messageSlot = (message_slot *) (file->private_data);*/
-    messageSlot = message_slots_array[minor];
+    messageSlot = (message_slot *) (file->private_data);
+    /*messageSlot = message_slots_array[minor];*/
 
     if (messageSlot == NULL){
         printk("messageSlot is NULL\n");
@@ -257,8 +258,8 @@ static long device_ioctl( struct   file* file,
     }
 
     /*file->private_data = (void*) message_slots_array[minor];*//*todo check!!!!!*/
-    /*messageSlot = (message_slot*) (file->private_data);*/
-    messageSlot = (message_slot*) (message_slots_array[minor]);
+    messageSlot = (message_slot*) (file->private_data);
+    /*messageSlot = (message_slot*) (message_slots_array[minor]);*/
     if (messageSlot == NULL){
         printk("messageSlot is NULL in ioctl()\n");
         return -EINVAL;
