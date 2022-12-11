@@ -12,21 +12,8 @@
 #include <linux/errno.h>
 #include <linux/slab.h>
 
-
 MODULE_LICENSE("GPL");
 
-typedef struct channel{
-    unsigned int id;
-    char* current_message;
-    int message_length;
-    struct channel* next;
-}channel;
-
-typedef struct message_slot{
-    channel* first_channel;
-    channel* current_channel;
-    int isSET;
-}message_slot;
 
 /*data structure to describe individual message slots*/
 static message_slot* message_slots_array[MAX_NUM_OF_FILES + 1];/*todo check if +1*/
@@ -41,15 +28,16 @@ static int device_open( struct inode* inode,
     channel* channel1;
     message_slot* messageSlot;
 
-    printk(KERN_ALERT "device_open invoked\n");
+    printk("device_open invoked\n");
 
     minor = iminor(inode);
-    printk(KERN_DEBUG "minor = %d\n", minor);
+    printk("minor = %d\n", minor);
     if (message_slots_array[minor] == NULL){
         printk("(message_slots_array[minor] == NULL) in device_open\n");
         messageSlot = (message_slot*) kmalloc(sizeof(message_slot), GFP_KERNEL);
-        channel1 = (channel *) kmalloc(sizeof(channel), GFP_KERNEL);
-        if (messageSlot == NULL || channel1 == NULL){
+        /*channel1 = (channel *) kmalloc(sizeof(channel), GFP_KERNEL);
+        if (messageSlot == NULL || channel1 == NULL){*/
+        if (messageSlot == NULL){
             printk("kmalloc failed in device_open\n");
             return -1;
             /*todo return  einmem*/
@@ -60,11 +48,10 @@ static int device_open( struct inode* inode,
         messageSlot->isSET = 0;/*todo check if 0 or 1 needed*/
         message_slots_array[minor] = messageSlot;
 
-    }else{
+    }/*else{
         printk("messageSlot in open = %p\n", message_slots_array[minor]);
         printk("messageSlot->first_channel ptr in open = %p\n", (message_slots_array[minor]->first_channel));
-        /*printk("first_channel_ptr id oof messageSlot in open = %u\n", message_slots_array[minor]->first_channel->id);*/
-    }
+    }*/
     file->private_data = (void *) messageSlot;/*todo check*/
     printk("device_open succeeded\n");
     return SUCCESS;
@@ -75,7 +62,6 @@ static int device_open( struct inode* inode,
 static int device_release( struct inode* inode,
                            struct file*  file){
     printk("device_release invoked\n");
-    /*kfree(file->private_data);*/
     return SUCCESS;
 }
 
@@ -94,9 +80,9 @@ static ssize_t device_read( struct file* file,
     int i;
     int minor;
 
-    printk(KERN_ALERT "device_read invoked\n");
+    printk("device_read invoked\n");
 
-    if ( file == NULL ){
+    if (file == NULL){
         printk("file is NULL\n");
         return -EINVAL;
     }
@@ -133,7 +119,7 @@ static ssize_t device_read( struct file* file,
         printk("(message == NULL) in device_read\n");
         return -EWOULDBLOCK;
     }
-    printk(KERN_DEBUG "message = %p, channel1->current_message = %p, message_len = %d\n", message, channel1->current_message, message_len);
+    /*printk("message = %p, channel1->current_message = %p, message_len = %d\n", message, channel1->current_message, message_len);*/
 
     if(length < message_len){
         printk("buffer length is smaller than last message length");

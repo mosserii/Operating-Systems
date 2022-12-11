@@ -14,4 +14,17 @@
 #define MSG_SLOT_CHANNEL _IOW(MAJOR_NUM, 0, unsigned long)
 /*todo DEVICE_RANGE_NAME*/
 
+typedef struct channel{
+    unsigned int id;
+    char* current_message;
+    int message_length;
+    struct channel* next;
+}channel;
+
+typedef struct message_slot{
+    channel* first_channel;
+    channel* current_channel;
+    int isSET;
+}message_slot;
+
 #endif
