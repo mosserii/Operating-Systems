@@ -38,7 +38,6 @@ static int device_open( struct inode* inode,
         if (messageSlot == NULL){
             printk("kmalloc failed in device_open\n");
             return -1;
-            /*todo return  einmem*/
         }
         messageSlot->isSET = 0;
         /*placing opened file into the "minor" place in the data structure*/
@@ -121,7 +120,7 @@ static ssize_t device_read( struct file* file,
         /*safe way to get bytes from the buffer into a (char*) */
         if((put_user(message[i], &buffer[i])) != 0){
             printk("i = %d put_user(message[i], &buffer[i]) != 0\n", i);
-            return -1;/*todo maybe different error*/
+            return -1;
         }
     }
     printk("%d bytes were read from device\n", i);
@@ -228,7 +227,7 @@ static long device_ioctl( struct   file* file,
 
     if(message_slots_array[minor]==NULL){
         printk("message_slot_array and file error\n");
-        return -1;/*todo check*/
+        return -1;
     }
 
     file->private_data = (void*) message_slots_array[minor];/*get the file slot from our data structure*/
