@@ -129,13 +129,8 @@ int perform_random_read(int fd){
                             "channel_msg is - %s\n", fd, channel,channels_msg[channel]);
         }
     }
-    if (channels_msg[channel] == NULL){
-        fprintf(stderr,"perform_random_read: FAILED!\n");
-        status=0;
-        return -1;
-    }
 
-    if(-1!=rc && strcmp(bffr,channels_msg[channel])!=0){
+    if(-1!=rc && channels_msg[channel] == NULL){
         passed=0;
         fprintf(stderr, "perform_random_read: read value doesnt match written message\n");
         fprintf(stderr, "DETAILS:\n"
