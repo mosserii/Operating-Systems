@@ -9,22 +9,23 @@
 #include <sys/ioctl.h>
 
 int main(int argc, char* argv[]){
-    char* slot_path;
+
+    char* messageSlot_path;
     int fd;
     unsigned int channel_id;
     char message[MAX_BUF_LEN];
-    int ret_val;
     int message_len;
+    int ret_val;
 
     if (argc != 3){
         perror("ERROR : number of command line arguments is not valid");
         exit(1);
     }
 
-    slot_path = argv[1];
+    messageSlot_path = argv[1];
     channel_id = atoi(argv[2]);
 
-    fd = open(slot_path, O_RDWR);
+    fd = open(messageSlot_path, O_RDWR);
     if (fd < 0){
         perror("ERROR : file opening failed");
         exit(1);
@@ -51,14 +52,4 @@ int main(int argc, char* argv[]){
         exit(1);
     }
     exit(0);
-
-
-
-
-
-
-
-
-
-
 }
