@@ -23,12 +23,13 @@ static message_slot* message_slots_array[MAX_NUM_OF_FILES + 1];
 //================== DEVICE FUNCTIONS ===========================
 static int device_open( struct inode* inode,
                         struct file*  file ){
-    printk("device_open invoked\n");
+
 
     int minor;
     message_slot* messageSlot;
 
     minor = iminor(inode);
+    printk("device_open invoked\n");
     printk("minor = %d\n", minor);
 
     /*creating a data structure for the file being opened*/
@@ -314,11 +315,13 @@ static int __init simple_init(void){
 
 //---------------------------------------------------------------
 static void __exit simple_cleanup(void){
+
+    int j;
     channel* channel_ptr;
     channel* next_channel;
     unregister_chrdev(MAJOR_NUM, DEVICE_RANGE_NAME);
 
-    int j;
+
     for (j = 0; j < MAX_NUM_OF_FILES; j++) {
         if (message_slots_array[j] != NULL){
             /*cleaning message slot number j*/
