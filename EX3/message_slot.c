@@ -280,7 +280,7 @@ static long device_ioctl( struct   file* file,
     return SUCCESS;
 }
 
-
+/*BASED ON OS RECREATION 6*/
 //==================== DEVICE SETUP =============================
 // This structure will hold the functions to be called
 // when a process does something to the device we created
