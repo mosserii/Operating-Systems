@@ -54,7 +54,7 @@ def create_slot_file(template, minor_num):
         print("THIS IS WRONG! Contact the developer of this file and tell him he made a mistake.")
         delete_all_files()
         exit(-1)
-    execute(f"test ! -f {filename} && sudo mknod {filename} c 240 {minor_num} || echo '' > /dev/null")
+    execute(f"test ! -f {filename} && sudo mknod {filename} c 235 {minor_num} || echo '' > /dev/null")
     execute(f"sudo chmod o+rw {filename}")
     FILE_NAMES[filename] = {}
     return filename
