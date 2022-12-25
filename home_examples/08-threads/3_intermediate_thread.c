@@ -9,7 +9,7 @@ int thread_func(void *thread_param) {
   printf("In thread #%ld\n", thrd_current());
   printf("I received %d from my caller\n", *y);
 
-  *y += 1;
+  *y += 1;/*will change it anywhere*/
 
   return *y;
 }

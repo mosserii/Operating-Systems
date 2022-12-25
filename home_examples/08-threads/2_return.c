@@ -10,7 +10,7 @@ int busy_work(void *t) {
   printf("Thread %ld starting\n", tid);
 
   for (int i = 0; i < 10000000; i++) {
-    result = result + sin(i) * tan(i);
+    result = result + 1;
   }
 
   printf("Thread %ld done. Result = %e\n", tid, result);

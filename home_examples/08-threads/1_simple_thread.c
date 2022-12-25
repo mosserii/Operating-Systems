@@ -6,7 +6,7 @@
 int thread_func(void *thread_param) {
   // thrd_current type is implementation defined
   printf("In thread #%ld\n", thrd_current());
-  printf("I received \"%s\" from my caller\n", (char *)thread_param);
+  printf("I received \"%s\" from my caller\n", (char *)thread_param);/*thread_param == args*/
 
   thrd_exit(EXIT_SUCCESS);
   // return EXIT_SUCCESS;// <- same as this
