@@ -84,8 +84,7 @@ int main(int argc, char *argv[]){
     int notwritten = strlen(data_buff);
 
     // keep looping until nothing left to write
-    while( notwritten > 0 )
-    {
+    while( notwritten > 0 ){
       // notwritten = how much we have left to write
       // totalsent  = how much we've written so far
       // nsent = how much we've written in last write() call */

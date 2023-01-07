@@ -24,8 +24,7 @@ int main(int argc, char *argv[])
   socklen_t addrsize = sizeof(struct sockaddr_in );
 
   memset(recv_buff, 0,sizeof(recv_buff));
-  if( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-  {
+  if( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0){
     printf("\n Error : Could not create socket \n");
     return 1;
   }
