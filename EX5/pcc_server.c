@@ -44,6 +44,7 @@ void print_and_close() {
 int main(int argc, char *argv[]){
 
 
+
     uint16_t server_port = atoi(argv[1]); /*todo check if not just unsigned int?*/
     int listenfd;
     int total_bytes_read = 0;

@@ -31,6 +31,7 @@ int main(int argc, char *argv[]){
     char* file_path = argv[3];
 
 
+
     struct sockaddr_in serv_addr; // where we Want to get to
     struct sockaddr_in my_addr;   // where we actually connected through todo check if needed
     struct sockaddr_in peer_addr; // where we actually connected to todo check if needed
