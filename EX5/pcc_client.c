@@ -22,7 +22,6 @@ void read_counter_from_server(int sockfd);
 
 int main(int argc, char *argv[]){
 
-    int  bytes_read =  0;
     FILE* file_d; /*todo check if not int*/
     uint32_t N; /*Number of bytes in file*/ /*todo check if not uint32_t?*/
     int sockfd;
