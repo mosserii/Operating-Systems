@@ -87,7 +87,7 @@ void send_N_to_server(unsigned int N, int sockfd) {
 
     int nsent = -1;
     int totalsent = 0; /*todo o check*/
-    int notwritten = strlen(data_buff);
+    int notwritten = strlen(data_buff);/*todo and also bigger than 0*/
 
     // keep looping until nothing left to write
     while (notwritten > 0){
