@@ -1,16 +1,11 @@
 
 #include <sys/socket.h>
-#include <sys/types.h>
 #include <netinet/in.h>
-#include <netdb.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
-#include <arpa/inet.h>
-#include <errno.h>
-#include <sys/file.h>
 #include <stdatomic.h>
 #include <signal.h>
 
@@ -51,9 +46,6 @@ int main(int argc, char *argv[]){
 
     uint16_t server_port = atoi(argv[1]); /*todo check if not just unsigned int?*/
     int listenfd;
-    int rc;
-
-
     int total_bytes_read = 0;
     int bytes_read = 0;
     int unread_bytes = 0;/*todo check if it is possible when the declaration with int is here!!!!*/
@@ -74,7 +66,7 @@ int main(int argc, char *argv[]){
     struct sigaction control_SIGINT; /*todo change*/
     control_SIGINT.sa_handler=&SIGINT_handler;
     control_SIGINT.sa_flags=SA_RESTART;
-    if( (rc = sigaction(SIGINT,&control_SIGINT,NULL)) == -1) {
+    if( (sigaction(SIGINT,&control_SIGINT,NULL)) == -1) {
         fprintf(stderr, "socket creation in server failed: %s\n", strerror(errno));
         exit(1);
     }
@@ -145,7 +137,7 @@ int main(int argc, char *argv[]){
                     fprintf(stderr, "read N from client failed: %s\n", strerror(errno));
                     exit(1);
                 } else{/*a TCP error*/
-                    fprintf(stderr, "TCP error occured in server: %s\n", strerror(errno));
+                    fprintf(stderr, "TCP error occurred in server: %s\n", strerror(errno));
                     /*todo free reading buffer*/
                     error_with_client = 1;
                 }
@@ -192,12 +184,12 @@ int main(int argc, char *argv[]){
                     fprintf(stderr, "read file in server failed: %s\n", strerror(errno));
                     exit(1);
                 } else{/*a TCP error*/
-                    fprintf(stderr, "TCP error occured in server: %s\n", strerror(errno));
+                    fprintf(stderr, "TCP error occurred in server: %s\n", strerror(errno));
                     /*todo free reading buffer*/
                     error_with_client = 1;
                 }
             }
-            if (unread_bytes < 0){ //safety check, kind of preventing something like heartbleed that we saw in recrition
+            if (unread_bytes < 0){ //safety check, kind of preventing something like heartbleed that we saw in recreation
                 fprintf(stderr, "unread_bytes < 0 - illegal (client sent more bytes than he said): %s\n", strerror(errno));
                 exit(1);
             }
@@ -234,7 +226,7 @@ int main(int argc, char *argv[]){
                     fprintf(stderr, "write to client from server failed: %s\n", strerror(errno));
                     exit(1);
                 } else{/*a TCP error*/
-                    fprintf(stderr, "TCP error occured in server: %s\n", strerror(errno));
+                    fprintf(stderr, "TCP error occurred in server: %s\n", strerror(errno));
                     error_with_client = 1;
                 }
             }
