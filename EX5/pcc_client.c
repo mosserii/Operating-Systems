@@ -14,9 +14,9 @@
 
 #define ONE_MB 1000000
 
-void send_N_to_server(unsigned int N, int sockfd);
+void send_N_to_server(uint32_t N, int sockfd);
 
-void send_file_to_server(unsigned int N, FILE *file_d, int sockfd);
+void send_file_to_server(uint32_t N, FILE *file_d, int sockfd);
 
 void read_counter_from_server(int sockfd);
 
@@ -24,7 +24,7 @@ int main(int argc, char *argv[]){
 
     int  bytes_read =  0;
     FILE* file_d; /*todo check if not int*/
-    unsigned int N; /*Number of bytes in file*/ /*todo check if not uint32_t?*/
+    uint32_t N; /*Number of bytes in file*/ /*todo check if not uint32_t?*/
     int sockfd;
     char* server_ip = argv[1];
     uint16_t server_port = atoi(argv[2]); /*todo check if not just unsigned int?*/
@@ -82,40 +82,34 @@ int main(int argc, char *argv[]){
 
 
 
-void send_N_to_server(unsigned int N, int sockfd) {
-    /*todo like 2nd func - much better*/
+void send_N_to_server(uint32_t N, int sockfd) {
 
-    int nsent = -1;
-    int totalsent = 0; /*todo o check*/
-    int notwritten = strlen(data_buff);/*todo and also bigger than 0*/
+    uint32_t N_to_send = htonl(N);
+    int bytes_sent = -1;
+    int total_bytes_sent = 0;
 
     // keep looping until nothing left to write
-    while (notwritten > 0){
-        // notwritten = how much we have left to write
-        // totalsent  = how much we've written so far
-        // nsent = how much we've written in last write() call */
-        nsent = write(sockfd, &N + totalsent, notwritten);/*todo fix!*/
-        // check if error occured (client closed connection?)
-        if (nsent < 0){
-            fprintf(stderr, "nsent < 0, write N failed: %s\n", strerror(errno));
+    while (total_bytes_sent < 4){
+        bytes_sent = write(sockfd, &N_to_send + total_bytes_sent, 4 - total_bytes_sent);/*todo fix!*/
+        // todo check if error occured (client closed connection?)
+        if (bytes_sent < 0){
+            fprintf(stderr, "bytes_sent < 0, write N to server failed: %s\n", strerror(errno));
             exit(1);
         }
-
-        totalsent  += nsent;
-        notwritten -= nsent;
+        total_bytes_sent  += bytes_sent;
     }
 
 }
 
 
-void send_file_to_server(unsigned int N, FILE* file_d, int sockfd) {
+void send_file_to_server(uint32_t N, FILE* file_d, int sockfd) {
     char *buff[ONE_MB]; /* todo check about star */
-    int bytes_read = 0;
+    int bytes_read = 0;//todo check if not long
     int bytes_sent = 0;
-    int notwritten;
+    int notwritten = (int) N;
+    int total_bytes_sent = 0;
 
     while ((bytes_read = read(sockfd, buff, ONE_MB)) != 0) {
-
         notwritten = bytes_read;
         while (notwritten > 0) {
             if ((bytes_sent = write(sockfd, buff, bytes_read) == -1)) {
@@ -123,7 +117,12 @@ void send_file_to_server(unsigned int N, FILE* file_d, int sockfd) {
                 exit(1);
             }
             notwritten -= bytes_sent;
+            total_bytes_sent += bytes_sent;
         }
+    }
+    if (total_bytes_sent > N){
+        fprintf(stderr, "total_bytes_sent > N - illegal (client sent more bytes than he said): %s\n", strerror(errno));
+        exit(1);
     }
 }
 
@@ -131,12 +130,23 @@ void send_file_to_server(unsigned int N, FILE* file_d, int sockfd) {
 
 void read_counter_from_server(int sockfd) {
 
-    /*todo ofc*/
+    int total_bytes_read = 0;
+    int bytes_read = 0;
+    uint32_t counter_from_server;
+    uint32_t counter;
 
-
-
-
+    while (total_bytes_read < 4){
+        bytes_read = read(sockfd, &counter_from_server + total_bytes_read , 4 - total_bytes_read);
+        if (bytes_read < 0){
+            fprintf(stderr, "bytes_read < 0, read counter from server failed: %s\n", strerror(errno));
+            exit(1);
+        }
+        total_bytes_read += bytes_read;
+    }
+    close(sockfd);
+    counter = ntohl(counter_from_server);
     printf("# of printable characters: %u\n", counter);
+    exit(0);
 }
 
 

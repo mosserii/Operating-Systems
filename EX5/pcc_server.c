@@ -19,7 +19,7 @@ void print_and_close();
 
 int connfd = -1;
 int SIGINT_flag = 0; // indicates if a client is connected, so we need to finish with him and then finish with server
-unsigned int pcc_total[LAST_CHAR - FIRST_CHAR + 1]; /*counters array todo malloc?*/
+uint32_t pcc_total[LAST_CHAR - FIRST_CHAR + 1]; /*counters array todo malloc?*/
 
 
 
@@ -55,7 +55,7 @@ int main(int argc, char *argv[]){
 
     struct sockaddr_in serv_addr;
     socklen_t addrsize = sizeof(struct sockaddr_in );
-    memset(pcc_total, 0, (LAST_CHAR - FIRST_CHAR + 1)* sizeof(unsigned int));
+    memset(pcc_total, 0, (LAST_CHAR - FIRST_CHAR + 1)* sizeof(uint32_t));
 
     if (argc != 2){
         fprintf(stderr, "invalid number of arguments in server: %s\n", strerror(errno));/*todo check!*/
@@ -107,8 +107,8 @@ int main(int argc, char *argv[]){
         connfd = -1;
         int current_counter = 0;
         int counter_to_send = 0;
-        unsigned int buffer_for_N;
-        unsigned int N;
+        uint32_t buffer_for_N;
+        uint32_t N;
 
 
 
@@ -154,8 +154,8 @@ int main(int argc, char *argv[]){
         N = ntohl(buffer_for_N); /*N value, todo check*/
 
 
-        unsigned int pcc_current[LAST_CHAR - FIRST_CHAR + 1]; /*current client counters*/
-        memset(pcc_current, 0, (LAST_CHAR - FIRST_CHAR + 1) * sizeof(unsigned int));
+        uint32_t pcc_current[LAST_CHAR - FIRST_CHAR + 1]; /*current client counters*/
+        memset(pcc_current, 0, (LAST_CHAR - FIRST_CHAR + 1) * sizeof(uint32_t));
 
         //Todo  READ file content FROM CLIENT and updating counters, reading char after char
         total_bytes_read = 0;
