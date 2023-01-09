@@ -17,7 +17,7 @@ void SIGINT_handler();
 
 void print_and_close();
 
-int connfd = -1;
+atomic_int connfd = -1;
 int SIGINT_flag = 0; // indicates if a client is connected, so we need to finish with him and then finish with server
 uint32_t pcc_total[LAST_CHAR - FIRST_CHAR + 1]; /*counters array todo malloc?*/
 
@@ -113,7 +113,8 @@ int main(int argc, char *argv[]){
 
 
 
-        if( (connfd = accept(listenfd, NULL, NULL)) == -1){ /*todo check of NULL*/
+        connfd = accept(listenfd, NULL, NULL); /*todo check of NULL*/
+        if(connfd == -1){
             fprintf(stderr, "accept in server failed: %s\n", strerror(errno));
             exit(1);
         }
