@@ -25,7 +25,6 @@ uint32_t pcc_total[LAST_CHAR - FIRST_CHAR + 1]; /*counters array todo malloc?*/
 
 
 void SIGINT_handler() {
-
     // no client is connected to server
     if (connfd == -1)
         print_and_close();
@@ -47,11 +46,11 @@ int main(int argc, char *argv[]){
 
     uint16_t server_port = atoi(argv[1]); /*todo check if not just unsigned int?*/
     int listenfd;
-    int total_bytes_read = 0;
-    int bytes_read = 0;
-    int unread_bytes = 0;/*todo check if it is possible when the declaration with int is here!!!!*/
-    int total_bytes_sent = 0;
-    int bytes_sent = 0;
+    int total_bytes_read;
+    int bytes_read;
+    int unread_bytes;/*todo check if it is possible when the declaration with int is here!!!!*/
+    int total_bytes_sent;
+    int bytes_sent;
 
 
     struct sockaddr_in serv_addr;
