@@ -65,6 +65,7 @@ def parse_server_output(server, printalbe_characters):
 
     for line in server_stdout.decode('ascii').split('\n')[:-1]:
         symbol = line[6:7]
+        print(line[11:])
         count = int(line[11:].split(' ')[0])
         assert printalbe_characters[symbol] == count, f"Wrong count for symbol, symbol: '{symbol}' expected count: {printalbe_characters[symbol]}, actual count: {count}, line: {line}"
 
