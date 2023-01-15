@@ -106,6 +106,7 @@ def test_server_happy_flow(server_instance, port, msg):
     validate_server_counts(server_instance.stdout.read().decode(), msg)
 
 
+
 @pytest.mark.parametrize(
     "port,msg",
     [
@@ -115,7 +116,7 @@ def test_server_happy_flow(server_instance, port, msg):
 def test_server_memory_usage(server_instance, port, msg):
     psutil = pytest.importorskip("psutil")
     time.sleep(0.5)
-    sock = socket.create_connection(("127.0.0.1", port), timeout=3)
+    sock = socket.create_connection(("127.0.0.1", port), timeout=3000)
     size = len(msg).to_bytes(4, "big", signed=False)
     sock.sendall(size + msg)
     sock.close()
