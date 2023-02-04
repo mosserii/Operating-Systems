@@ -21,6 +21,9 @@ atomic_int connfd = -1;
 int SIGINT_flag = 0; // indicates if a client is connected, so we need to finish with him and then finish with server
 uint32_t pcc_total[LAST_CHAR - FIRST_CHAR + 1]; /*counters array*/
 
+uint32_t pcc_current[LAST_CHAR - FIRST_CHAR + 1]; /*current client counters*/
+
+
 
 
 
@@ -59,8 +62,6 @@ int main(int argc, char *argv[]){
     struct sockaddr_in serv_addr;
     socklen_t addrsize = sizeof(struct sockaddr_in );
     memset(pcc_total, 0, (LAST_CHAR - FIRST_CHAR + 1)* sizeof(uint32_t));
-
-
 
 
     struct sigaction control_SIGINT;
@@ -154,7 +155,6 @@ int main(int argc, char *argv[]){
 
         N = ntohl(buffer_for_N); /*N value in host byte order*/
 
-        uint32_t pcc_current[LAST_CHAR - FIRST_CHAR + 1]; /*current client counters*/
         memset(pcc_current, 0, (LAST_CHAR - FIRST_CHAR + 1) * sizeof(uint32_t));
 
         //READ file content FROM CLIENT and updating counters, reading char by char

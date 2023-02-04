@@ -62,12 +62,13 @@ def validate_server_counts(server_output: str, file_content: bytes):
         if match is None:
             pytest.fail(f"unexpected server output line: {line}")
         counts[match.group(1)] = int(match.group(2))
-    for char in set(file_content):
-        if chr(char) not in string.printable or char < 32:
-            continue
-        assert counts.get(chr(char)) == file_content.count(
-            char
-        ), f"character count mismatch for character '{chr(char)}' ({char})"
+    expected_counts = {
+        chr(char): file_content.count(char)
+        for char in set(file_content)
+        if chr(char) in string.printable and char >= 32
+    }
+    expected_counts.update({char: 0 for char in counts if char not in expected_counts})
+    assert counts == expected_counts, "server character counts mismatch"
 
 
 def get_random_file(size: int):
@@ -110,7 +111,7 @@ def test_server_happy_flow(server_instance, port, msg):
 @pytest.mark.parametrize(
     "port,msg",
     [
-        pytest.param(9990, b"z" * 50 * 2**20, id="50MB file"),
+        pytest.param(9990, get_random_file(50 * 2**20), id="50MB file"),
     ],
 )
 def test_server_memory_usage(server_instance, port, msg):
@@ -123,6 +124,57 @@ def test_server_memory_usage(server_instance, port, msg):
     proc_info = psutil.Process(server_instance.pid)
     if (memory_used := proc_info.memory_full_info().uss) > 2 * 2**20:
         pytest.fail(f"Server using too much memory ({memory_used / 2**20:,.2}MB)")
+
+
+@pytest.mark.parametrize(
+    "port",
+    [
+        pytest.param(9991, id="premature client disconnect"),
+    ],
+)
+def test_server_connection_error_handling(server_instance, port):
+    time.sleep(0.5)
+    sock = socket.create_connection(("127.0.0.1", port), timeout=3)
+    sock.sendall((50 * 2**20).to_bytes(4, "big", signed=False))
+    sock.sendall(b"partial")
+    sock.close()
+    time.sleep(0.5)
+    assert server_instance.poll() is None, "server terminated unexpectedly"
+    sock = socket.create_connection(("127.0.0.1", port), timeout=3)
+    msg_len = 9 * 2**20
+    sock.sendall((msg_len).to_bytes(4, "big", signed=False))
+    sock.sendall(b"$" * msg_len)
+    sock.close()
+    server_instance.send_signal(subprocess.signal.SIGINT)
+    server_instance.wait()
+    validate_server_counts(server_instance.stdout.read().decode(), b"$" * msg_len)
+
+
+@pytest.mark.parametrize(
+    "port",
+    [
+        pytest.param(9991, id="SIGINT handling delayed until client processed"),
+    ],
+)
+def test_server_sigint_client_atomicity(server_instance, port):
+    time.sleep(0.5)
+    msg = b"quod erat demonstrandum" * 2**20
+    sock = socket.create_connection(("127.0.0.1", port), timeout=3)
+    sock.sendall(len(msg).to_bytes(4, "big", signed=False))
+    sock.sendall(msg[: 9 * 2**20])
+    server_instance.send_signal(subprocess.signal.SIGINT)
+    time.sleep(0.2)
+    assert server_instance.poll() is None, "server terminated unexpectedly"
+    sock.sendall(msg[9 * 2**20 :])
+    with pytest.raises(ConnectionError):
+        another_sock = socket.create_connection(("127.0.0.1", port), timeout=3)
+        another_sock.sendall(len(msg).to_bytes(4, "big", signed=False))
+        another_sock.sendall(msg)
+        another_sock.recv(4)
+        another_sock.close()
+    sock.close()
+    server_instance.wait()
+    validate_server_counts(server_instance.stdout.read().decode(), msg)
 
 
 @pytest.fixture
@@ -163,8 +215,8 @@ def test_client_happy_flow(port, msg, mock_server):
         res = run_client("client", "127.0.0.1", port, f.name)
     assert res.stderr == "", "client stderr is not empty"
     assert (
-            res.stdout
-            == f"# of printable characters: {sum(1 for char in msg if chr(char) in string.printable and char >= 32)}\n"
+        res.stdout
+        == f"# of printable characters: {sum(1 for char in msg if chr(char) in string.printable and char >= 32)}\n"
     ), "client stdout is not as expected"
 
 
@@ -184,8 +236,8 @@ def test_integration(server_instance, port, msg):
         res = run_client("client", "127.0.0.1", port, f.name)
     assert res.stderr == "", "client stderr is not empty"
     assert (
-            res.stdout
-            == f"# of printable characters: {sum(1 for char in msg if chr(char) in string.printable and char >= 32)}\n"
+        res.stdout
+        == f"# of printable characters: {sum(1 for char in msg if chr(char) in string.printable and char >= 32)}\n"
     ), "client stdout is not as expected"
     server_instance.send_signal(subprocess.signal.SIGINT)
     server_instance.wait()
